@@ -3,6 +3,7 @@ package main
 import (
 	"mygo/grpctest/hello"	
     _ "fmt"
+    "os"
     "log"
     "runtime"
     "strconv"
@@ -20,7 +21,7 @@ var (
     wg sync.WaitGroup   
 )
 
-const (
+var (
     networkType = "tcp"
     server      = "127.0.0.1"
     port        = "41005"
@@ -29,6 +30,14 @@ const (
 )
 
 func main() {
+	if len(os.Args) >= 5 {
+		server = os.Args[1]
+		port = os.Args[2]
+		parallel, _ = strconv.Atoi(os.Args[3])
+		times, _ = strconv.Atoi(os.Args[4])
+		log.Printf("set params: %s %s %d %d", server, port, parallel, times)
+	}
+
     runtime.GOMAXPROCS(runtime.NumCPU())
     currTime := time.Now()
 
@@ -70,7 +79,9 @@ func sayHello(client hello.HelloClient) {
 
     response, _ := client.Hello(context.Background(), &request) //调用远程方法
 
-    _ = response
+    if r == 10 {
+    	log.Printf(response.Text)
+	}
     //判断返回结果是否正确
     // if id, _ := strconv.Itoa(strings.Split(response.Name, ":")[0]); id != r {
     //     log.Printf("response error  %#v", response)
